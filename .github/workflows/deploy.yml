@@ -1,0 +1,40 @@
+name: Deploy WebAssembly Shiny Dashboard
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python environment
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Compilers and Tools
+        run: |
+          pip install shiny shinylive pandas matplotlib
+
+      - name: Compile Application into WebAssembly Web Files
+        run: |
+          shinolive export . site
+
+      - name: Setup GitHub Static Page Actions
+        uses: actions/configure-pages@v4
+
+      - name: Upload Finished Web Artifacts
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: 'site'
+
+      - name: Publish Live Dashboard to GitHub Pages
+        uses: actions/deploy-pages@v4
